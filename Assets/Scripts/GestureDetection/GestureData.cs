@@ -1,6 +1,5 @@
 ﻿using SaveManagement;
 using System;
-using System.Collections.Generic;
 using UnityEngine;
 
 public static class GestureDataManager
@@ -50,19 +49,11 @@ public static class GestureDataManager
         Save();
     }
 
-    public static string GetKey(int index)
-    {
-        return data.GetKey(index);
-    }
 }
 
 [Serializable]
-public class GestureData : SortedList<string, Gesture>
+public class GestureData : SerializableListDictionary<string, Gesture>
 {
-    public string GetKey(int index)
-    {
-        return Keys[0];
-    }
 
     public int GetNumberGestures()
     {

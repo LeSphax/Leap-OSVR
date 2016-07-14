@@ -7,25 +7,19 @@ namespace GestureDetection.Algorithms
     public class TestAlgorithm : MonoBehaviour
     {
 
-        public static Algorithm algorithm;
+        public static ClassificationAlgorithm algorithm;
 
         // Use this for initialization
         void Start()
         {
-            AlgorithmInputData input = AlgorithmInputData.ConvertGestureData(GestureDataManager.data);
+            AlgorithmInput algorithmInput = new AlgorithmInput(GestureDataManager.data);
 
             float time = Time.realtimeSinceStartup;
-            algorithm = new SVM();
+            algorithm = new KNN(algorithmInput);
 
-            double error = algorithm.Train(input);
+            double error = 0;// = algorithm.TestEffectiveness(algorithmInput.data);
 
             Debug.Log("Time : " + (Time.realtimeSinceStartup - time) + "  Error : " + error);
-        }
-
-        // Update is called once per frame
-        void Update()
-        {
-
         }
     }
 }

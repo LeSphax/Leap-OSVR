@@ -109,7 +109,7 @@ namespace GestureDetection.StateMachine
         {
             new GestureDetectedTransition(this);
             new RegistrationDemandTransition(this);
-            new DisabledTransition(this);
+            new DisabledTransitionNoSave(this);
         }
 
         public override void enter()
@@ -120,8 +120,9 @@ namespace GestureDetection.StateMachine
         internal override void Update()
         {
             stateMachine.detector.AddFrame();
-            stateMachine.detector.CheckSimilarity();
-            stateMachine.detector.CheckBeginningGesture();
+            stateMachine.detector.CheckSimilarityWithAll();
+            //stateMachine.detector.CheckSimilarity();
+            //stateMachine.detector.CheckBeginningGesture();
         }
 
         internal override void DrawGizmos()
@@ -280,6 +281,18 @@ namespace GestureDetection.StateMachine
         public override void action(DisabledEvent evt)
         {
             myState.stateMachine.detector.SaveGesture();
+        }
+
+        public override State<GestureStateMachine, GestureEvent> goTo()
+        {
+            return new DetectingGesturesState(myState.stateMachine);
+        }
+    }
+
+    internal class DisabledTransitionNoSave : GestureTransition<DisabledEvent>
+    {
+        internal DisabledTransitionNoSave(State<GestureStateMachine, GestureEvent> myState) : base(myState)
+        {
         }
 
         public override State<GestureStateMachine, GestureEvent> goTo()

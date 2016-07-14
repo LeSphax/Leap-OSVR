@@ -9,7 +9,7 @@ using UnityEngine;
 
 namespace GestureDetection.Algorithms
 {
-    class SVM : Algorithm
+    class SVM : ClassificationAlgorithm
     {
         MulticlassSupportVectorLearning teacher;
         MulticlassSupportVectorMachine svm;
@@ -17,32 +17,30 @@ namespace GestureDetection.Algorithms
 
         private const int NUMBER_POINTS = 100;
 
-
-        public SVM()
+        public SVM(AlgorithmInput input) : base(input)
         {
-
         }
 
-
-        public string Recognize(double[] input)
+        public override string Recognize(double[] input)
         {
             input = normalizer.Normalize(input);
-            return GestureDataManager.GetKey(svm.Compute(input));
+            return GetClassName(svm.Compute(input));
         }
 
-        public double TestEffectiveness(AlgorithmInputData input)
+        public override double TestEffectiveness(AlgorithmInputData data)
         {
-            return teacher.ComputeError(input.data, input.classifications);
+            data = NormalizeInputs(data);
+            return teacher.ComputeError(data.input, data.output);
         }
 
-        public void Train(AlgorithmInputData input)
+        protected override void Train(AlgorithmInput algorithmInput)
         {
-            input = NormalizeInputs(input);
+            AlgorithmInputData data = NormalizeInputs(algorithmInput.data);
 
             IKernel kernel = new Polynomial(10);
-            svm = new MulticlassSupportVectorMachine(NUMBER_POINTS , kernel, input.numberClasses);
+            svm = new MulticlassSupportVectorMachine(NUMBER_POINTS , kernel, algorithmInput.numberClasses);
 
-            teacher = new MulticlassSupportVectorLearning(svm, input.data, input.classifications);
+            teacher = new MulticlassSupportVectorLearning(svm, data.input, data.output);
 
             teacher.Algorithm = (m_svm, classInputs, classOutputs, i, j) =>
     new SequentialMinimalOptimization(m_svm, classInputs, classOutputs);
@@ -50,11 +48,10 @@ namespace GestureDetection.Algorithms
             teacher.Run();
         }
 
-        private AlgorithmInputData NormalizeInputs(AlgorithmInputData input)
+        private AlgorithmInputData NormalizeInputs(AlgorithmInputData inputData)
         {   
-            input.data = input.data.CustomApply<double[],double[]>(normalizer.Normalize);
-            Debug.Log(input.data[0].Length);
-            return input;
+            inputData.input = inputData.input.CustomApply<double[],double[]>(normalizer.Normalize);
+            return inputData;
         }
 
         // Create a L2-regularized L2-loss optimization algorithm for

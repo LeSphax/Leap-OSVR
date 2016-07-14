@@ -49,8 +49,7 @@ public class Gesture : SerializableDictionary<string, List<Vector3>>
         int index = 0;
         foreach (string fingerIndex in Fingers)
         {
-            int i = index;
-            parameters.Add(new FingerParameter(i));
+            parameters.Add(new FingerParameter(index));
             colorFingers -= new Color(0.2F, 0.0F, 0.0F, 0.0F);
             index++;
         }
@@ -64,6 +63,11 @@ public class Gesture : SerializableDictionary<string, List<Vector3>>
             newGesture[parameterName] = this[parameterName].GetRange(index, count);
         }
         return newGesture;
+    }
+
+    public string GetGestureClass(ClassificationAlgorithm algorithm)
+    {
+       return algorithm.Recognize(AlgorithmInput.GestureToData(this));
     }
 
     public static bool AreGesturesSimilar(Gesture savedGesture, Gesture gestureToRecognize)

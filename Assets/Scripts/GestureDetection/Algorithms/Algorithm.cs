@@ -7,46 +7,98 @@ using UnityEngine;
 
 namespace GestureDetection.Algorithms
 {
-    public interface Algorithm
+    public abstract class ClassificationAlgorithm
     {
+        protected Dictionary<int, string> classNames;
 
-        void Train(AlgorithmInputData input);
+        public ClassificationAlgorithm(AlgorithmInput input)
+        {
+            classNames = input.classNames;
+            Train(input);
+        }
 
-        double TestEffectiveness(AlgorithmInputData input);
+        public string GetClassName(int index)
+        {
+            return classNames[index];
+        }
 
-        string Recognize(double[] input);
+        protected abstract void Train(AlgorithmInput input);
+
+        public abstract double TestEffectiveness(AlgorithmInputData input);
+
+        public abstract string Recognize(double[] input);
     }
 
     public struct AlgorithmInputData
     {
-        public double[][] data;
-        public int[] classifications;
-        public int numberClasses;
+        public double[][] input;
+        public int[] output;
+    }
 
-        public static AlgorithmInputData ConvertGestureData(GestureData gestureData)
+    public class AlgorithmInput
+    {
+        public AlgorithmInputData data;
+        public int numberClasses
         {
-            AlgorithmInputData result;
-            result.data = new double[gestureData.GetNumberGestures()][];
-            result.classifications = new int[gestureData.GetNumberGestures()];
-            result.numberClasses = gestureData.Count;
+            get
+            {
+                return classNames.Count;
+            }
+        }
+        public Dictionary<int, string> classNames
+        {
+            get;
+            private set;
+        }
 
+        public AlgorithmInput(GestureData gestureData)
+        {
+            classNames = InitClassNames(gestureData);
+            this.data = CreateAlgorithmInput(gestureData);
+        }
+
+        private Dictionary<int,string> InitClassNames(GestureData gestureData)
+        {
+            Dictionary<int, string> newClassNames = new Dictionary<int, string>();
+            int classIndex = 0;
+            foreach (string key in gestureData.Keys)
+            {
+                newClassNames.Add(classIndex, key);
+                classIndex++;
+            }
+            return newClassNames;
+        }
+
+        private AlgorithmInputData CreateAlgorithmInput(GestureData gestureData)
+        {
+            AlgorithmInputData input;
+            input.input = new double[gestureData.GetNumberGestures()][];
+            input.output = new int[gestureData.GetNumberGestures()];
 
             int classNumber = 0;
             int startIndex = 0;
-            foreach (string key in gestureData.Keys)
+            for (int x = 0; x < classNames.Count; x++)
             {
+                string key = classNames[x];
                 for (int i = startIndex; i < startIndex + gestureData[key].Count; i++)
                 {
-                    result.classifications[i] = classNumber;
-                    List<Vector3> list = gestureData[key][i - startIndex][Gesture.PalmPositions];
-                    result.data[i] = new double[list.Count];
-                    for (int y = 0; y < list.Count; y++)
-                    {
-                        result.data[i][y] = list[i].z;
-                    }
+                    input.output[i] = classNumber;
+                    Gesture gesture = gestureData[key][i - startIndex];
+                    input.input[i] = GestureToData(gesture);
                 }
                 startIndex += gestureData[key].Count;
                 classNumber++;
+            }
+            return input;
+        }
+
+        public static double[] GestureToData(Gesture gesture)
+        {
+            List<Vector3> list = gesture[Gesture.PalmPositions];
+            double[] result = new double[list.Count];
+            for (int y = 0; y < list.Count; y++)
+            {
+                result[y] = list[y].z;
             }
             return result;
         }

@@ -1,4 +1,5 @@
-﻿using GestureDetection.StateMachine;
+﻿using GestureDetection.Algorithms;
+using GestureDetection.StateMachine;
 using Leap;
 using Leap.Unity;
 using SaveManagement;
@@ -25,7 +26,6 @@ namespace GestureDetection
 
         void Awake()
         {
-            Debug.Log(System.Environment.Version);
             registrations = new Dictionary<Gesture, GestureHandler>();
             framesToCheck = new SerializableListDictionary<int, Gesture>();
 
@@ -67,6 +67,7 @@ namespace GestureDetection
 
         internal void StartGesture()
         {
+            if (currentData == null)
             currentData = new Gesture();
         }
 
@@ -140,6 +141,12 @@ namespace GestureDetection
                 //Debug.Log(currentData.NumberPoints + " : " + Time.timeSinceLevelLoad);
             }
 
+        }
+
+        internal void CheckSimilarityWithAll()
+        {
+            if (currentData.NumberPoints >= 50)
+               Debug.Log(currentData.GetSubGesture(currentData.NumberPoints - 50, 50).GetGestureClass(TestAlgorithm.algorithm));
         }
 
 

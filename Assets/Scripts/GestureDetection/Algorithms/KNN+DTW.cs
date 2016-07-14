@@ -1,45 +1,47 @@
-﻿using Accord.MachineLearning;
-using Accord.MachineLearning.VectorMachines;
-using Accord.MachineLearning.VectorMachines.Learning;
-using Accord.Statistics.Kernels;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using Accord.MachineLearning.Jambon;
 using UnityEngine;
 
 namespace GestureDetection.Algorithms
 {
-    class KNN : Algorithm
+    class KNN : ClassificationAlgorithm
     {
-        KNearestNeighbors knn;
-        public KNN()
-        {
+        KNearestNeighbors<double[]> knn;
 
+        public KNN(AlgorithmInput input) : base(input)
+        {
         }
 
-
-        public string Recognize(double[] input)
+        public override string Recognize(double[] input)
         {
-            return GestureDataManager.GetKey(knn.Compute(input));
+            double[] copy = new double[input.Length];
+            input.CopyTo(copy, 0);
+            //Debug.Log(input.Length);
+            //Debug.Log(string.Join(",", input.CustomApply<double,string>(x => x.ToString())));
+            return GetClassName(knn.Compute(copy));
         }
 
-        public double TestEffectiveness(AlgorithmInputData input)
+        public override double TestEffectiveness(AlgorithmInputData data)
         {
+            knn = new KNearestNeighbors<double[]>(3, 2, data.input, data.output, Distance.DynamicTimeWarpDouble);
             int nbFalse = 0;
-            for (int i = 0; i < input.data.Length; i++)
+            for (int i = 0; i < data.input.Length; i++)
             {
-                if (!(knn.Compute(input.data[i]) == input.classifications[i]))
+                Debug.Log("i ------------------------- " + i);
+                //for (int y = 0; y < data.input[i].Length; y++)
+                //{
+                //    Debug.Log(data.input[i][y]);
+                //}
+                if (!(knn.Compute(data.input[i]) == data.output[i]))
                 {
                     nbFalse++;
                 }
             }
-            return nbFalse / input.data.Length;
+            return nbFalse / data.input.Length;
         }
 
-        public void Train(AlgorithmInputData input)
+        protected override void Train(AlgorithmInput algorithmInput)
         {
-            knn = new KNearestNeighbors(5, input.numberClasses, input.data, input.classifications, Distance.DynamicTimeWarpDouble);
+            knn = new KNearestNeighbors(5, algorithmInput.numberClasses, algorithmInput.data.input, algorithmInput.data.output, Distance.DynamicTimeWarpDouble);
         }
 
         // Create a L2-regularized L2-loss optimization algorithm for
