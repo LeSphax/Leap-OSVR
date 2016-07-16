@@ -45,7 +45,7 @@ namespace GestureDetection.Algorithms
 
         public static double DynamicTimeWarpDouble(double[] gesture1, double[] gesture2)
         {
-            return DynamicTimeWarp<double>(gesture1, gesture2, ((x, y) => x - y));
+            return DynamicTimeWarp<double>(gesture1, gesture2, ((x, y) => Math.Abs(y- x)));
         }
     }
 }

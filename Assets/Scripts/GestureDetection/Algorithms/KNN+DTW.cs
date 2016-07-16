@@ -1,4 +1,4 @@
-﻿using Accord.MachineLearning.Jambon;
+﻿using Accord.MachineLearning;
 using UnityEngine;
 
 namespace GestureDetection.Algorithms
@@ -22,7 +22,7 @@ namespace GestureDetection.Algorithms
 
         public override double TestEffectiveness(AlgorithmInputData data)
         {
-            knn = new KNearestNeighbors<double[]>(3, 2, data.input, data.output, Distance.DynamicTimeWarpDouble);
+            knn = new KNearestNeighbors<double[]>(10, 2, data.input, data.output, Distance.DynamicTimeWarpDouble);
             int nbFalse = 0;
             for (int i = 0; i < data.input.Length; i++)
             {

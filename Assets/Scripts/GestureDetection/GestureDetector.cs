@@ -146,7 +146,12 @@ namespace GestureDetection
         internal void CheckSimilarityWithAll()
         {
             if (currentData.NumberPoints >= 50)
-               Debug.Log(currentData.GetSubGesture(currentData.NumberPoints - 50, 50).GetGestureClass(TestAlgorithm.algorithm));
+            {
+                string gestureClass = currentData.GetSubGesture(currentData.NumberPoints - 50, 50).GetGestureClass(TestAlgorithm.algorithm);
+                if (gestureClass!="None")
+                    Debug.Log(gestureClass);
+            }
+               
         }
 
 

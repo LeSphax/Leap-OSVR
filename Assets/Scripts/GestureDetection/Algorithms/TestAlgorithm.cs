@@ -15,9 +15,9 @@ namespace GestureDetection.Algorithms
             AlgorithmInput algorithmInput = new AlgorithmInput(GestureDataManager.data);
 
             float time = Time.realtimeSinceStartup;
-            algorithm = new KNN(algorithmInput);
+            algorithm = new DTW(algorithmInput);
 
-            double error = 0;// = algorithm.TestEffectiveness(algorithmInput.data);
+            double error  = algorithm.TestEffectiveness(algorithmInput.data);
 
             Debug.Log("Time : " + (Time.realtimeSinceStartup - time) + "  Error : " + error);
         }

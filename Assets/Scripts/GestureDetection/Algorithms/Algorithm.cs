@@ -1,8 +1,4 @@
-﻿using Accord.Math;
-using Accord.Math.Transforms;
-using Accord.Statistics.Models.Regression.Linear;
-using System.Collections.Generic;
-using System.Numerics;
+﻿using System.Collections.Generic;
 using UnityEngine;
 
 namespace GestureDetection.Algorithms
@@ -19,6 +15,10 @@ namespace GestureDetection.Algorithms
 
         public string GetClassName(int index)
         {
+            if (index == -1)
+            {
+                return "None";
+            }
             return classNames[index];
         }
 
@@ -94,9 +94,9 @@ namespace GestureDetection.Algorithms
 
         public static double[] GestureToData(Gesture gesture)
         {
-            List<Vector3> list = gesture[Gesture.PalmPositions];
-            double[] result = new double[list.Count];
-            for (int y = 0; y < list.Count; y++)
+            Vector3[] list = Gesture.parameters[0].NormalizeValues(gesture[Gesture.PalmPositions].ToArray());
+            double[] result = new double[list.Length];
+            for (int y = 0; y < list.Length; y++)
             {
                 result[y] = list[y].z;
             }

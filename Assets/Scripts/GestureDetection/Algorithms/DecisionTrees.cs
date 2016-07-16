@@ -1,10 +1,10 @@
-﻿using Accord.MachineLearning.DecisionTrees;
-using Accord.MachineLearning.DecisionTrees.Learning;
-using Accord.Math;
-using GestureDetection.Algorithms;
-using System.Collections.Generic;
-using UnityEngine;
-using System;
+﻿//using Accord.MachineLearning.DecisionTrees;
+//using Accord.MachineLearning.DecisionTrees.Learning;
+//using Accord.Math;
+//using GestureDetection.Algorithms;
+//using System.Collections.Generic;
+//using UnityEngine;
+//using System;
 
 //class DecisionTrees : Algorithm
 //{

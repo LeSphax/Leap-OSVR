@@ -3,6 +3,7 @@ using Leap.Unity;
 using SerializeDictionary;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.Assertions;
 
@@ -252,6 +253,23 @@ public class Gesture : SerializableDictionary<string, List<Vector3>>
         }
     }
 
+
+    public string ToCSV(int numberPoints)
+    {
+        List<string> parameters = new List<string>();
+
+        foreach (string key in Keys)
+        {
+            List<string> values = this[key].Select(vector => vector.ToString()).ToList<string>();
+            string[] emptyStrings = new string[numberPoints - values.Count];
+            emptyStrings.Populate<string>("");
+            values.InsertRange(values.Count, emptyStrings);
+            string[] line = {";"+ key, string.Join(";", values.ToArray()) };
+            parameters.Add(string.Join(";",line));
+        }
+
+        return string.Join(Environment.NewLine, parameters.ToArray());
+    }
 }
 
 
