@@ -39,6 +39,7 @@ namespace SaveManagement
         public static Class Load<Class>(string path)
         {
             path = Application.persistentDataPath + path;
+            Debug.Log(path);
             if (File.Exists(path))
             {
                 FileStream file = File.Open(path, FileMode.Open);

@@ -16,7 +16,6 @@ namespace GestureDetection
         internal GestureStateMachine stateMachine;
 
         private Dictionary<Gesture, GestureHandler> registrations;
-        private SerializableListDictionary<int, Gesture> framesToCheck;
 
         private Gesture currentData;
 
@@ -24,10 +23,12 @@ namespace GestureDetection
         private GestureHandler newHandlerToSave;
         private string nameNewGesture;
 
+        public bool OnlyLearning;
+
         void Awake()
         {
             registrations = new Dictionary<Gesture, GestureHandler>();
-            framesToCheck = new SerializableListDictionary<int, Gesture>();
+
 
             if (HandModel == null)
             {
@@ -53,7 +54,6 @@ namespace GestureDetection
         void OnDisable()
         {
             stateMachine.handleEvent(new DisabledEvent());
-
         }
 
         internal bool IsThereMovement()
@@ -67,7 +67,6 @@ namespace GestureDetection
 
         internal void StartGesture()
         {
-            if (currentData == null)
             currentData = new Gesture();
         }
 
@@ -88,10 +87,17 @@ namespace GestureDetection
 
         internal void SaveGesture()
         {
-            Debug.Log("SaveGesture");
-            // registrations.Add(currentData, newHandlerToSave);
-            GestureDataManager.Add(nameNewGesture, currentData);
-            //Saving.Save("Test.xml", currentData);
+            if (currentData.NumberPoints > 10)
+            {
+                Debug.Log("SaveGesture " +currentData.NumberPoints);
+                // registrations.Add(currentData, newHandlerToSave);
+                GestureDataManager.Add(nameNewGesture, currentData);
+                //Saving.Save("Test.xml", currentData);
+            }
+            else
+            {
+                Debug.LogWarning("Dismissed Data");
+            }
         }
 
         internal void AddFrame()
@@ -102,54 +108,23 @@ namespace GestureDetection
             }
         }
 
-        internal void CheckBeginningGesture()
-        {
-            //Debug.Log("First : " +Time.timeSinceLevelLoad);
-            foreach (Gesture savedGesture in registrations.Keys)
-            {
-                if (savedGesture.NumberPoints < 10)
-                {
-                    Debug.Log("Inferior " + savedGesture.NumberPoints);
-                }
-                if (savedGesture.IsSimilarToBeginning(currentData))
-                {
-                    int indexPredictedLastKeyFrame = currentData.NumberPoints - 1 + savedGesture.NumberPoints - 1;
-                    framesToCheck.Add(indexPredictedLastKeyFrame, savedGesture);
-                    Debug.LogWarning("SimilarBeginning");
-                }
-            }
-            //Debug.Log("Second : " +Time.timeSinceLevelLoad);
-        }
-
-        internal void CheckSimilarity()
-        {
-
-            List<Gesture> list;
-            if (framesToCheck.TryGetValue(currentData.NumberPoints, out list))
-            {
-                //Debug.Log(currentData.NumberPoints+" : " + Time.timeSinceLevelLoad);
-                foreach (Gesture gesture in list)
-                {
-                    Assert.IsTrue(currentData.NumberPoints > 0);
-                    Assert.IsTrue(gesture.NumberPoints > 0);
-                    if (Gesture.AreGesturesSimilar(gesture, currentData.GetSubGesture(currentData.NumberPoints - gesture.NumberPoints, gesture.NumberPoints)))
-                    {
-                        stateMachine.handleEvent(new GestureDetectedEvent(gesture));
-                        return;
-                    }
-                }
-                //Debug.Log(currentData.NumberPoints + " : " + Time.timeSinceLevelLoad);
-            }
-
-        }
-
         internal void CheckSimilarityWithAll()
         {
-            if (currentData.NumberPoints >= 50)
+            if (!OnlyLearning)
             {
-                string gestureClass = currentData.GetSubGesture(currentData.NumberPoints - 50, 50).GetGestureClass(TestAlgorithm.algorithm);
-                if (gestureClass!="None")
-                    Debug.Log(gestureClass);
+                if (currentData.NumberPoints >= 50)
+                {
+                    string gestureClass = currentData.GetSubGesture(currentData.NumberPoints - 50, 50).GetGestureClass(TestAlgorithm.algorithm);
+                    if (gestureClass != "None")
+                    {
+                        Debug.Log(gestureClass);
+                        StartGesture();
+                    }
+                    else
+                    {
+                       // Debug.Log("None");
+                    }
+                }
             }
                
         }
@@ -167,6 +142,9 @@ namespace GestureDetection
                         gesture.DrawGizmos(Color.blue);
                         break;
                     }
+                }
+                if (currentData != null)
+                {
                     currentData.DrawGizmos();
                 }
                 if (stateMachine != null)

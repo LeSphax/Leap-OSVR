@@ -3,13 +3,52 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using Utilities;
 
 public static class GestureDataManager
 {
-    private const string path = "/GestureData.xml";
+    private const string pathGestures = "/GestureData.xml";
+    private const string pathClasses = "/Classes.xml";
+
+    public static Map<string, int> _classesMap;
+    public static Map<string, int> classesMap
+    {
+        get
+        {
+            if (_classesMap == null)
+            {
+                _classesMap = LoadClasses();
+                if (_classesMap == null)
+                {
+                    _classesMap = new Map<string, int>();
+                    _classesMap.Add("None", -1);
+                }
+            }
+            return _classesMap;
+        }
+        set
+        {
+            _classesMap = value;
+        }
+    }
+
+    private static Map<string, int> LoadClasses()
+    {
+        return Saving.Load<Map<string, int>>(pathClasses);
+    }
+
+    private static int currentClassIndex = 0;
+    public static int numberClasses
+    {
+        get
+        {
+            return classesMap.Count;
+        }
+    }
 
     private static GestureData _data;
-    public static GestureData data
+
+    public static GestureData Data
     {
         get
         {
@@ -31,25 +70,41 @@ public static class GestureDataManager
 
     private static GestureData Load()
     {
-        return Saving.Load<GestureData>(path);
+        return Saving.Load<GestureData>(pathGestures);
     }
 
-    private static void Save()
+    public static void Save()
     {
-        Saving.Save(path, data);
-        data.toCSV();
+        Saving.Save(pathGestures, Data);
+        Saving.Save(pathClasses, classesMap);
+        Data.toCSV();
+
     }
 
     public static void Add(string name, Gesture gesture)
     {
-        data.Add(name, gesture);
-        Save();
+        if (!classesMap.ContainsKey(name))
+        {
+            classesMap.Add(name, currentClassIndex);
+            currentClassIndex++;
+        }
+        Data.Add(name, gesture);
     }
+
+    public static int GetClassNumber(string className)
+    {
+        return classesMap.Forward[className];
+    }
+
+    public static string GetClassName(int classNumber)
+    {
+        return classesMap.Reverse[classNumber];
+    }
+
 
     public static void Clear()
     {
-        data = new GestureData();
-        Save();
+        Data = new GestureData();
     }
 
 }
@@ -68,10 +123,14 @@ public class GestureData : SerializableListDictionary<string, Gesture>
         return result;
     }
 
+    public override void Add(string key, Gesture value)
+    {
+        base.Add(key, value);
+    }
+
 
     public void toCSV()
     {
-        string[] keys = Keys.ToArray();
         List<string> lines = new List<string>();
 
         int maxNumberPoints = GetMaxNumberPoints();
@@ -87,7 +146,7 @@ public class GestureData : SerializableListDictionary<string, Gesture>
                 lines.ToArray()
             )};
 
-        string csv = string.Join(Environment.NewLine,content );
+        string csv = string.Join(Environment.NewLine, content);
         try
         {
             System.IO.File.WriteAllText("C:/Users/Sebas/Desktop" + "/test.csv", csv);

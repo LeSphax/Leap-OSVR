@@ -121,8 +121,6 @@ namespace GestureDetection.StateMachine
         {
             stateMachine.detector.AddFrame();
             stateMachine.detector.CheckSimilarityWithAll();
-            //stateMachine.detector.CheckSimilarity();
-            //stateMachine.detector.CheckBeginningGesture();
         }
 
         internal override void DrawGizmos()
