@@ -1,23 +1,12 @@
 ﻿using Accord.Math;
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using UnityEngine;
 using UnityEngine.Assertions;
-using Utilities;
 
 namespace GestureDetection.Algorithms
 {
 
-    public class MultivariateAlgorithmInput
+    public class MultivariateAlgorithmInput : Dictionary<string, UnivariateAlgorithmInput[]>
     {
-
-        public class ParameterToData : Dictionary<string, UnivariateAlgorithmInput[]>
-        {
-
-        }
-        public ParameterToData parametersData;
 
         public int numberClasses
         {
@@ -29,7 +18,7 @@ namespace GestureDetection.Algorithms
 
         public MultivariateAlgorithmInput(GestureData gestureData)
         {
-            parametersData = CreateDictionary();
+            CreateDictionary();
             InitData(gestureData);
             //foreach (string key in parametersData.Keys)
             //{
@@ -37,20 +26,18 @@ namespace GestureDetection.Algorithms
             //}
         }
 
-        private ParameterToData CreateDictionary()
+        private void CreateDictionary()
         {
-            ParameterToData result = new ParameterToData();
             foreach (Parameter parameter in Gesture.parameters)
             {
                 UnivariateAlgorithmInput[] inputs = new UnivariateAlgorithmInput[parameter.Dimension()];
                 for (int i = 0; i < parameter.Dimension(); i++)
                 {
-                    inputs[i] = new UnivariateAlgorithmInput(this);
+                    inputs[i] = new UnivariateAlgorithmInput();
                 }
-                result.Add(parameter.key, inputs);
+                Add(parameter.key, inputs);
             }
-            Assert.AreEqual(Gesture.parameterKeys.Count, result.Count);
-            return result;
+            Assert.AreEqual(Gesture.parameterKeys.Count, Count);
         }
 
         private void InitData(GestureData gestureData)
@@ -72,7 +59,7 @@ namespace GestureDetection.Algorithms
                         {
                             Assert.IsNotNull(separatedDimensions[i]);
                             Assert.IsTrue(separatedDimensions[i].Length > 10);
-                            parametersData[parameterValues.parameterKey][i].AddData(separatedDimensions[i], index);
+                            this[parameterValues.parameterKey][i].AddData(separatedDimensions[i], index);
                         }
 
                     }

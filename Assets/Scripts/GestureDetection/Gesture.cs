@@ -102,9 +102,10 @@ public class Gesture : SerializableDictionary<string, ParameterValues>
         return newGesture;
     }
 
-    public string GetGestureClass(ClassificationAlgorithm algorithm)
+    public string GetGestureClass(AlgorithmComponent algorithm, out List<string> errors)
     {
-        return GestureDataManager.GetClassName(algorithm.Recognize(this)[0]);
+        DistanceResult result = algorithm.Recognize(this, out errors);
+        return GestureDataManager.GetClassName(result.Best());
     }
 
     public void DrawGizmos(Color color)
@@ -117,9 +118,23 @@ public class Gesture : SerializableDictionary<string, ParameterValues>
 
     private void DrawGizmosParameter(Color color, Parameter parameter)
     {
-        foreach (double[] position in this[parameter.key].values)
+        int num = 0;
+        List<double[]> myValues = this[parameter.key].values;
+        foreach (double[] position in myValues)
         {
-            parameter.DrawPoint(position.ToVector3(), color);
+            if (num == 0)
+            {
+                parameter.DrawPoint(position.ToVector3(), Color.magenta);
+            }
+            else if (num == myValues.Count)
+            {
+                parameter.DrawPoint(position.ToVector3(), Color.white);
+            }
+            else
+            {
+                parameter.DrawPoint(position.ToVector3(), color);
+            }
+            num++;
         }
     }
 

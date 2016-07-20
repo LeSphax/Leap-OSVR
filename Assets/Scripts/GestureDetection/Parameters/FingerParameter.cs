@@ -1,5 +1,6 @@
 ﻿using Leap.Unity;
 using UnityEngine;
+using Utilities;
 
 public class FingerParameter : Parameter
 {

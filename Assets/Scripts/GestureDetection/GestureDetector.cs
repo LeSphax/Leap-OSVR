@@ -4,6 +4,7 @@ using Leap;
 using Leap.Unity;
 using SaveManagement;
 using System.Collections.Generic;
+using UnityEditor;
 using UnityEngine;
 using UnityEngine.Assertions;
 
@@ -11,11 +12,12 @@ namespace GestureDetection
 {
     public class GestureDetector : Detector
     {
+        private const int MAX_WINDOW_SIZE = 120;
         [Tooltip("The hand model to watch. Set automatically if detector is on a hand.")]
         public IHandModel HandModel = null;
         internal GestureStateMachine stateMachine;
 
-        private Dictionary<Gesture, GestureHandler> registrations;
+        private Dictionary<string, GestureHandler> registrations = new Dictionary<string, GestureHandler>();
 
         private Gesture currentData;
 
@@ -25,9 +27,10 @@ namespace GestureDetection
 
         public bool OnlyLearning;
 
+        public Dictionary<Gesture, List<string>> subGesturesToVisualize = new Dictionary<Gesture, List<string>>();
+
         void Awake()
         {
-            registrations = new Dictionary<Gesture, GestureHandler>();
 
 
             if (HandModel == null)
@@ -37,18 +40,17 @@ namespace GestureDetection
             stateMachine = new GestureStateMachine(this);
         }
 
-        public void AddGesture(string name, GestureHandler handler)
+        public void AddListener(string name, GestureHandler handler)
         {
-            nameNewGesture = name;
-            newHandlerToSave = handler;
-            stateMachine.handleEvent(new RegistrationEvent());
+            registrations.Add(name, handler);
         }
 
         void Update()
         {
-            // Debug.Log(currentData.NumberPoints + " : " + Time.realtimeSinceStartup);
+            //
+            float time = Time.realtimeSinceStartup;
             stateMachine.Update();
-            // Debug.Log(currentData.NumberPoints + " : " + Time.realtimeSinceStartup);
+            Debug.Log("TopUpdate : NumberPoints : " + currentData.NumberPoints + " - UpdateTime : " + (Time.realtimeSinceStartup - time));
         }
 
         void OnDisable()
@@ -89,7 +91,7 @@ namespace GestureDetection
         {
             if (currentData.NumberPoints > 10)
             {
-                Debug.Log("SaveGesture " +currentData.NumberPoints);
+                Debug.Log("SaveGesture " + currentData.NumberPoints);
                 // registrations.Add(currentData, newHandlerToSave);
                 GestureDataManager.Add(nameNewGesture, currentData);
                 //Saving.Save("Test.xml", currentData);
@@ -112,21 +114,39 @@ namespace GestureDetection
         {
             if (!OnlyLearning)
             {
-                if (currentData.NumberPoints >= 50)
+                Gesture subGesture = null;
+                int targetNumberPoints = 0;
+                // float time = Time.realtimeSinceStartup;
+                for (targetNumberPoints = 80; targetNumberPoints <= MAX_WINDOW_SIZE; targetNumberPoints += 10)
                 {
-                    string gestureClass = currentData.GetSubGesture(currentData.NumberPoints - 50, 50).GetGestureClass(TestAlgorithm.algorithm);
-                    if (gestureClass != "None")
+
+                    if (currentData.NumberPoints >= targetNumberPoints)
                     {
-                        Debug.Log(gestureClass);
-                        StartGesture();
+                        subGesture = currentData.GetSubGesture(currentData.NumberPoints - targetNumberPoints, targetNumberPoints);
+
+                        List<string> errors;
+                        string gestureClass = subGesture.GetGestureClass(TestAlgorithm.algorithm, out errors);
+                        subGesturesToVisualize.Add(subGesture, errors);
+                        if (gestureClass != "None")
+                        {
+                            Debug.LogWarning(gestureClass);
+                            subGesture = null;
+                            stateMachine.handleEvent(new GestureDetectedEvent(gestureClass));
+                        }
                     }
                     else
                     {
-                       // Debug.Log("None");
+                        break;
                     }
+
                 }
+                if (targetNumberPoints == MAX_WINDOW_SIZE + 10 && subGesture != null)
+                {
+                    currentData = subGesture;
+                }
+                //Debug.Log(Time.realtimeSinceStartup - time);
             }
-               
+
         }
 
 
@@ -135,14 +155,6 @@ namespace GestureDetection
         {
             if (ShowGizmos)
             {
-                if (registrations != null && registrations.Count > 0 && currentData != null)
-                {
-                    foreach (Gesture gesture in registrations.Keys)
-                    {
-                        gesture.DrawGizmos(Color.blue);
-                        break;
-                    }
-                }
                 if (currentData != null)
                 {
                     currentData.DrawGizmos();
@@ -153,16 +165,16 @@ namespace GestureDetection
         }
 #endif
 
-        internal void ExecuteHandler(Gesture gesture)
+        internal void ExecuteHandler(string className)
         {
             GestureHandler handler;
-            if (registrations.TryGetValue(gesture, out handler))
+            if (registrations.TryGetValue(className, out handler))
             {
                 handler.Invoke(HandModel.GetLeapHand());
             }
             else
             {
-                Debug.LogError("The gest that has been recognised should be in the list " + gesture);
+                Debug.LogError("The gest that has been recognised should be in the list " + className);
             }
         }
     }

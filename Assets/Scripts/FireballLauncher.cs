@@ -16,6 +16,7 @@ public class FireballLauncher : MonoBehaviour {
     void Start () {
         detector = GetComponent<GestureDetector>();
         FireballPrefab = Resources.Load<GameObject>("Fireball");
+        AddAllListeners();
     }
 	
 	// Update is called once per frame
@@ -23,18 +24,18 @@ public class FireballLauncher : MonoBehaviour {
 
         if (Input.GetKeyDown(KeyCode.L))
         {
-            detector.AddGesture("Load",CreateFireball);
+            detector.AddListener("Load",CreateFireball);
             Debug.Log("SAVE");
 
         }
         if (Input.GetKeyDown(KeyCode.S))
         {
-            detector.AddGesture("Send",LaunchFireball);
+            detector.AddListener("Send",LaunchFireball);
             Debug.Log("SAVE");
         }
         if (Input.GetKeyDown(KeyCode.N))
         {
-            detector.AddGesture("Nothing",DoNothing);
+            detector.AddListener("Nothing",DoNothing);
             Debug.Log("SAVE");
         }
         if (Input.GetKeyDown(KeyCode.C))
@@ -42,6 +43,12 @@ public class FireballLauncher : MonoBehaviour {
             GestureDataManager.Clear();
             Debug.Log("CLEAR");
         }
+    }
+
+    private void AddAllListeners()
+    {
+        detector.AddListener("Load", CreateFireball);
+        detector.AddListener("Send", LaunchFireball);
     }
 
     public void DoNothing(Hand hand)

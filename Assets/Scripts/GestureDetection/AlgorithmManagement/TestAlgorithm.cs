@@ -1,5 +1,4 @@
-﻿using GestureDetection.Algorithms;
-using UnityEngine;
+﻿using UnityEngine;
 
 
 namespace GestureDetection.Algorithms
@@ -7,7 +6,7 @@ namespace GestureDetection.Algorithms
     public class TestAlgorithm : MonoBehaviour
     {
 
-        public static ClassificationAlgorithm algorithm;
+        public static AlgorithmComponent algorithm;
 
         // Use this for initialization
         void Start()
@@ -15,7 +14,8 @@ namespace GestureDetection.Algorithms
             float time = Time.realtimeSinceStartup;
             if (GestureDataManager.Data.Count > 0)
             {
-                algorithm = new MultivariateAlgorithm<DTW>(GestureDataManager.Data);
+                algorithm = gameObject.AddComponent<AlgorithmComponent>();
+                algorithm.Init(GestureDataManager.Data);
 
                 double error = algorithm.ComputeError(GestureDataManager.Data);
 

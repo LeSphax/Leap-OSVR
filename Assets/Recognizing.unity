@@ -292,6 +292,7 @@ MonoBehaviour:
     m_TypeName: UnityEngine.Events.UnityEvent, UnityEngine, Version=0.0.0.0, Culture=neutral,
       PublicKeyToken=null
   HandModel: {fileID: 867040963}
+  OnlyLearning: 0
 --- !u!114 &626117786
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1905,6 +1906,7 @@ MonoBehaviour:
     m_TypeName: UnityEngine.Events.UnityEvent, UnityEngine, Version=0.0.0.0, Culture=neutral,
       PublicKeyToken=null
   HandModel: {fileID: 795409495}
+  OnlyLearning: 0
 --- !u!1 &1776077979
 GameObject:
   m_ObjectHideFlags: 0
@@ -2080,6 +2082,7 @@ GameObject:
   m_Component:
   - 4: {fileID: 2095521520}
   - 114: {fileID: 2095521519}
+  - 114: {fileID: 2095521521}
   m_Layer: 0
   m_Name: Tester
   m_TagString: Untagged
@@ -2110,3 +2113,15 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 4
+--- !u!114 &2095521521
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 2095521518}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a690de42f860bc849b499e0490074b5f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  detector: {fileID: 626117785}

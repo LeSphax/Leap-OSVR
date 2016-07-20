@@ -31,11 +31,11 @@ namespace GestureDetection.StateMachine
 
     internal class GestureDetectedEvent : GestureEvent
     {
-        internal Gesture gesture;
+        internal string className;
 
-        internal GestureDetectedEvent(Gesture gesture)
+        internal GestureDetectedEvent(string className)
         {
-            this.gesture = gesture;
+            this.className = className;
         }
     }
 
@@ -120,7 +120,9 @@ namespace GestureDetection.StateMachine
         internal override void Update()
         {
             stateMachine.detector.AddFrame();
+            float time = Time.realtimeSinceStartup;
             stateMachine.detector.CheckSimilarityWithAll();
+            Debug.Log("CHeckSimilarity "+ (Time.realtimeSinceStartup -time));
         }
 
         internal override void DrawGizmos()
@@ -336,7 +338,8 @@ namespace GestureDetection.StateMachine
 
         public override void action(GestureDetectedEvent evt)
         {
-            myState.stateMachine.detector.ExecuteHandler(evt.gesture);
+            myState.stateMachine.detector.ExecuteHandler(evt.className);
+            myState.stateMachine.detector.StartGesture();
         }
 
         public override State<GestureStateMachine, GestureEvent> goTo()

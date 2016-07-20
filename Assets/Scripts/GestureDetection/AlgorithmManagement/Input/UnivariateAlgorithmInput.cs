@@ -17,7 +17,6 @@ namespace GestureDetection.Algorithms
     {
         private List<double[]> inputData = new List<double[]>();
         private List<int> outputData = new List<int>();
-        private MultivariateAlgorithmInput parent;
 
         private bool hasChanged = true;
 
@@ -46,11 +45,6 @@ namespace GestureDetection.Algorithms
         public UnivariateAlgorithmInput()
         {
 
-        }
-
-        public UnivariateAlgorithmInput(MultivariateAlgorithmInput parent)
-        {
-            this.parent = parent;
         }
 
         public void AddData(double[] input, int output)
